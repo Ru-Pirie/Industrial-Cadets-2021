@@ -7,7 +7,7 @@ This is a college project which is part of the Industrial Cadets Program.
 
 2. In order to run the programs contained you will need to have python 3 installed as well as nodejs. They can be downloaded [HERE](https://nodejs.org/en/) and [HERE](https://www.python.org/downloads/)
 
-3. Open 2 terminal windows and navigate to where the the program is located. You will need to in the directory called `/server` run `npm i express multer` and in the directory `/door` run `pip install requests` before they will run.
+3. Open 2 terminal windows and navigate to where the the program is located. You will need to in the directory called `/server` run `npm i express multer body-parser` and in the directory `/door` run `pip install requests` before they will run.
 
 4. Once all of the terminals are open you should have the following:
     - One terminal in `/Industrial-Cadets-2021/door`
