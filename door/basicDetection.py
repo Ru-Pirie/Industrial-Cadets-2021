@@ -1,3 +1,4 @@
+import math
 import os
 import RPi.GPIO as GPIO
 import time
@@ -41,6 +42,7 @@ openDoor = False
 openDoorTimeout = 200
 openDoorCount = 0
 
+global reason
 reason = "None Given"
 
 triggered = False
@@ -60,6 +62,7 @@ def sendImage():
 
 def alarm(intruders):
 	url = f"{serverURL}/alarm/{id}?num={1}"
+	print(intruders)
 
 # Setup GPIO
 log("GPIO warnings have been set to false, you will not recieve error messages!", 2)
@@ -78,12 +81,38 @@ log(f"Setting Reset Switch as GPIO.IN. Pull to LOW", 0)
 GPIO.setup(RESET_SWITCH, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 def CheckStack():
-	return True
+	if not entranceTrig == exitTrig:
+		reason = "An invalid amount of triggers where detected."
+		return True
+
+	while len(tempMoveStack) > 0:
+		lookup = tempMoveStack.pop(0)
+		for i in range(len(tempMoveStack)):
+			if not tempMoveStack[i][0] == lookup[0]:
+				movementLog.append([lookup, tempMoveStack.pop(i)])
+				break
+
+	entranceCount = 0
+	exitCount = 0
+	for pair in movementLog:
+		if pair[0][0] == True:
+			exitCount += 1
+		elif pair[0][0] == False:
+			entranceCount += 1
+
+	if entranceCount > 1:
+		reason = f"Multipule people have entered with one ID swipe ({entranceCount})."
+		return True
+
+	log(f"{exitCount} people have left the building.")
+	return False
 
 while True:
 	# If allarmed state
 	if triggered:
 		if initialTrigger:
+			print(len(tempMoveStack))
+			alarm(math.floor((entranceTrig + exitTrig)/2))
 			log("TAIL GATE DETECTED", 2)
 			log(f"Reason: {reason}", 2)
 			log("Awaiting Reset...", 2)
@@ -105,22 +134,38 @@ while True:
 				if openDoorCount > openDoorTimeout:
 					reason = "Door Idle Open for longer than threshold."
 					triggered = True
+
+
+
 				if GPIO.input(ENTRANCE_BEAM) == GPIO.LOW and entranceTrig == 0:
 					entranceTrig = 1
 					entrance = True
+					tempMoveStack.append([False, entranceTrig + exitTrig])
 				elif GPIO.input(ENTRANCE_BEAM) == GPIO.LOW:
 					if not entrance:
 						log("Tailgate detected capturing photo.")
 						sendImage()
 						entranceTrig += 1
 						entrance = True
+						tempMoveStack.append([False, entranceTrig + exitTrig])
 				else:
 					entrance = False
 
-				if GPIO.input(EXIT_BEAM) == GPIO.LOW and exitTrig < 1:
+
+
+
+				if GPIO.input(EXIT_BEAM) == GPIO.LOW and exitTrig == 0:
 					exitTrig = 1
+					exit = True
+					tempMoveStack.append([True, exitTrig + entranceTrig])
 				elif GPIO.input(EXIT_BEAM) == GPIO.LOW:
-					exitTrig += 1
+					if not exit:
+						sendImage()
+						exit = True
+						exitTrig += 1
+						tempMoveStack.append([True, exitTrig + entranceTrig])
+				else:
+					exit = False
 
 			else:
 				# Take photo of verified user.
@@ -132,14 +177,10 @@ while True:
 		# If the door is not open and no alarm state
 		else:
 			if openDoor:
-				if entranceTrig > 0 and exitTrig == 0:
-					log("No entrance detected.", 1)
-				elif entranceTrig == 1 and exitTrig == 1:
-					log("Standard entry detected.", 1)
-				else:
-					log(f"{entranceTrig} {exitTrig}", 3)
+				triggered = CheckStack()
+				log(f"{entranceTrig} {exitTrig}", 3)
 				openDoor = False
-
+				
 				entranceTrig = 0
 				exitTrig = 0
 				movementLog = []

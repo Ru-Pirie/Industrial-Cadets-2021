@@ -95,7 +95,7 @@ while True:
 				for i in range(0, 5):
 					log("SYSTEM RESET", 1)
 				log("Waiting 10 seconds to arm", 0)
-				time.sleep(10)
+				log("no sleep for you", 1)
 	else:
 		# If door open
 		if GPIO.input(REED_SWITCH) != GPIO.HIGH:

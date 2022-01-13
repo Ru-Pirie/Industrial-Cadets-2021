@@ -1,3 +1,5 @@
+const f = require('fs')
+
 class Event {
 	constructor(app) {
 	this.route = '/'
