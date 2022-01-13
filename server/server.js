@@ -34,18 +34,17 @@ routes.forEach(async route => {
     app.all(event.route, async function (...args) {
         event.process(...args)
     })
-    
 });
 
 app.all("/door/:id", upload.array('file', 12), async (req, res) => {
-    if (req.files && req.files.length === 0) return res.status(400).end(JSON.stringify({ success: false, error: "No File Supplied" })) 
+    if (req.files && req.files.length === 0) return res.status(400).end(JSON.stringify({ success: false, error: "No File Supplied" }))
     if (!fs.existsSync(`./images/${req.params.id}`)) fs.mkdirSync(`./images/${req.params.id}`);
-   
+
     const imageName = `${Date.now()}.png`;
 
     const imageTempPath = req.files[0].path;
     const imageTargetPath = path.join(__dirname, `./images/${req.params.id}/${imageName}`);
-  
+
     if (path.extname(req.files[0].originalname).toLowerCase() === ".png") {
         fs.rename(imageTempPath, imageTargetPath, err => {
             if (err) return handleError(err, res);

@@ -1,7 +1,7 @@
 class Event {
 	constructor(app) {
-        this.route = '/'
-        this.methods = [ 'ALL' ]
+	this.route = '/'
+       	this.methods = [ 'ALL' ]
 	}
 
 	async process(req, res, next) {
