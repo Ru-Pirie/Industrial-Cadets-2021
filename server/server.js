@@ -2,6 +2,8 @@ const express = require('express');
 const parser = require('body-parser');
 const multer = require('multer');
 
+const db = require('better-sqlite3')('data.db');
+
 const fs = require('fs');
 const path = require('path');
 
@@ -28,11 +30,13 @@ app.use(parser.json())
 const routes = fs.readdirSync('./routes');
 
 routes.forEach(async route => {
+    if (route.includes('.html')) return;
     const file = require(`./routes/${route}`)
     const event = new file.Event(app);
     console.log(`Processing route file:\n    Route - ${event.route}\n    Methods - [ ${event.methods.join(', ')} ]`)    
-    app.all(event.route, async function (...args) {
-        event.process(...args)
+    console.log(event)
+    app[event.methods[0]](event.route, async function (...args) {
+        event.process(db, ...args)
     })
 });
 
@@ -67,4 +71,8 @@ app.all("/door/:id", upload.array('file', 12), async (req, res) => {
 
 app.listen(process.env.PORT, () => {
     console.log(`\nRunning: http://localhost:${process.env.PORT}`)
+})
+
+setInterval(() => {
+    
 })
