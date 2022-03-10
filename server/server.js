@@ -1,15 +1,23 @@
 const express = require('express');
 const parser = require('body-parser');
 const multer = require('multer');
+const fs = require('fs')
+
+fs.unlinkSync('./data.db');
 
 const db = require('better-sqlite3')('data.db');
-
-const fs = require('fs');
 const path = require('path');
 
 const upload = multer({ dest: './images/temp'})
 
 const app = express()
+
+async function setupDB() {
+	await db.prepare('CREATE TABLE IF NOT EXISTS doors(    `id` VARCHAR(36) NOT NULL PRIMARY KEY,    `trigger` TINYINT NOT NULL DEFAULT 0,    `alive` TINYINT NOT NULL DEFAULT 1,    `ping` TINYINT NOT NULL DEFAULT 0,    `name` VARCHAR(2048))').run()
+	await db.prepare('CREATE TABlE IF NOT EXISTS pings (`id` VARCHAR(2048) NOT NULL, `receuved` TIMESTAMP NOT NULL)').run()
+}
+
+setupDB();
 
 require('dotenv').config()
 
@@ -30,6 +38,7 @@ app.use(parser.json())
 const routes = fs.readdirSync('./routes');
 
 routes.forEach(async route => {
+	console.log(route)
     if (route.includes('.html')) return;
     const file = require(`./routes/${route}`)
     const event = new file.Event(app);
@@ -40,7 +49,7 @@ routes.forEach(async route => {
     })
 });
 
-app.all("/door/:id", upload.array('file', 12), async (req, res) => {
+app.post("/door/:id", upload.array('file', 12), async (req, res) => {
     if (req.files && req.files.length === 0) return res.status(400).end(JSON.stringify({ success: false, error: "No File Supplied" }))
     if (!fs.existsSync(`./images/${req.params.id}`)) fs.mkdirSync(`./images/${req.params.id}`);
 
@@ -73,6 +82,4 @@ app.listen(process.env.PORT, () => {
     console.log(`\nRunning: http://localhost:${process.env.PORT}`)
 })
 
-setInterval(() => {
-    
-})
+

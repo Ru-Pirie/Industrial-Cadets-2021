@@ -3,7 +3,7 @@ const path = require('path');
 class Event {
 	constructor(app) {
         this.route = '/door/:door/:image'
-        this.methods = [ 'get' ]
+        this.methods = [ 'post' ]
 	}
 
 	async process(db, req, res, next) {

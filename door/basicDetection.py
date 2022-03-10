@@ -23,9 +23,9 @@ def log(message, type = 0):
 # Setup Variables
 ENTRANCE_BEAM = 7
 EXIT_BEAM = 11
-REED_SWITCH = 13
+REED_SWITCH = 16
 ID_SWITCH = 15
-RESET_SWITCH = 16
+RESET_SWITCH = 13
 
 tempMoveStack = []
 movementLog = []

@@ -3,7 +3,7 @@ const fs = require('fs');
 class Event {
 	constructor(app) {
         this.route = '/door/:id'
-        this.methods = [ 'all' ]
+        this.methods = [ 'get' ]
 	}
 
 	async process(db, req, res, next) {
