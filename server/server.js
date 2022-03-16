@@ -14,7 +14,7 @@ const app = express()
 
 async function setupDB() {
 	await db.prepare('CREATE TABLE IF NOT EXISTS doors(    `id` VARCHAR(36) NOT NULL PRIMARY KEY,    `trigger` TINYINT NOT NULL DEFAULT 0,    `alive` TINYINT NOT NULL DEFAULT 1,    `ping` TINYINT NOT NULL DEFAULT 0,    `name` VARCHAR(2048))').run()
-	await db.prepare('CREATE TABlE IF NOT EXISTS pings (`id` VARCHAR(2048) NOT NULL, `receuved` TIMESTAMP NOT NULL)').run()
+	await db.prepare('CREATE TABlE IF NOT EXISTS pings (`id` VARCHAR(2048) NOT NULL, `recieved` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)').run()
 }
 
 setupDB();
